@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Assignment and Files</title>
+    <link rel="stylesheet" th:href="@{/css/styles3.css}">
+</head>
+<body>
+<div class="container">
+    <h1>Upload Assignment and Files</h1>
+    <form id="assignmentForm">
+        <label for="title">Title:</label>
+        <input type="text" id="title" name="title"><br><br>
+
+        <label for="description">Description:</label>
+        <textarea id="description" name="description"></textarea><br><br>
+
+        <label for="files" class="custom-file-upload">Choose Files</label>
+        <input type="file" id="files" name="files" multiple>
+        <br>
+
+        <input type="hidden" name="courseId" value="1">
+
+        <button type="submit">Upload Assignment</button>
+    </form>
+
+    <br>
+    <h2>Selected Files</h2>
+    <ul id="fileList"></ul>
+</div>
+
+<div class="button-container-toggle">
+    <button class="btn" onclick="toggleDarkMode()">Alternar Modo Oscuro</button>
+</div>
+
+<div class="button-back-container">
+    <a th:href="@{tareas}" id="back-btn" class="btn">Regresar</a>
+</div>
+
+<script>
+
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-theme');
+        const currentMode = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
+        localStorage.setItem('theme', currentMode);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-theme');
+        }
+    });
+
+    const files = [];
+
+    function deleteFileByIndex(index) {
+        files.splice(index, 1);
+        const fileList = document.getElementById('fileList');
+        const fileItem = document.getElementById(`file-${index}`);
+        const deleteButton = document.getElementById(`delete-${index}`);
+        fileItem.removeChild(deleteButton);
+        fileList.removeChild(fileItem);
+    }
+
+    function addFileToList(file) {
+        const index = files.length;
+        const fileList = document.getElementById('fileList');
+        const fileItem = document.createElement('li');
+        fileItem.setAttribute('id', `file-${index}`);
+        const deleteButton = document.createElement('button');
+        deleteButton.innerHTML = 'Delete';
+        deleteButton.setAttribute('id', `delete-${index}`);
+        deleteButton.addEventListener('click', () => {
+            deleteFileByIndex(index);
+        });
+
+
+        fileItem.innerHTML = file.name;
+        fileList.appendChild(fileItem);
+        fileItem.appendChild(deleteButton);
+
+        files.push(file);
+        console.log(files);
+    }
+
+    document.getElementById('files').addEventListener('change', (event) => {
+        const fileList = event.target.files;
+        for (let i = 0; i < fileList.length; i++) {
+            addFileToList(fileList[i]);
+        }
+    });
+
+    function uploadAssignment(event) {
+        event.preventDefault();
+
+        const formData = new FormData();
+        formData.append('title', document.getElementById('title').value);
+        formData.append('description', document.getElementById('description').value);
+        formData.append('courseId', '1');
+
+        files.forEach(file => {
+            formData.append('files', file);
+        });
+
+        fetch('/files/assignments', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(assignment => {
+                alert(`${assignment.message}`);
+                window.location.href = 'tareas';
+            });
+    }
+
+    document.getElementById('assignmentForm').addEventListener('submit', uploadAssignment);
+</script>
+</body>
+</html>

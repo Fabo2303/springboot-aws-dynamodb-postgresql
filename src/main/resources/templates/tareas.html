@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tareas del Curso</title>
+    <link rel="stylesheet" th:href="@{/css/styles2.css}">
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>Tareas del Curso</h1>
+    </header>
+    <div id="assignment-list" class="card-container">
+        <!-- Aquí se cargarán las tarjetas de las tareas -->
+    </div>
+
+    <div class="button-container-toggle">
+        <button class="btn" onclick="toggleDarkMode()">Alternar Modo Oscuro</button>
+    </div>
+
+    <div class="button-container">
+        <a th:href="@{upload}" id="upload-btn" class="btn">Subir Tarea</a>
+    </div>
+
+    <div class="button-back-container">
+        <a th:href="@{/}" id="back-btn" class="btn">Regresar</a>
+    </div>
+</div>
+
+<script>
+    // Alternar el modo oscuro
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-theme');
+        const currentMode = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
+        localStorage.setItem('theme', currentMode);
+    }
+
+    // Cargar el modo guardado al cargar la página
+    document.addEventListener('DOMContentLoaded', function () {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-theme');
+        }
+
+        fetch('/assignments/course/1')
+            .then(response => response.json())
+            .then(assignments => {
+                const assignmentList = document.getElementById('assignment-list');
+                assignments.forEach(assignment => {
+                    const card = document.createElement('div');
+                    card.classList.add('card');
+
+                    card.innerHTML = `
+                        <div class="card-header">
+                            <h2>${assignment.title}</h2>
+                            <button class="toggle-btn">Ver Archivos</button>
+                        </div>
+                        <div class="card-body" style="display: none;">
+                            <p>${assignment.description}</p>
+                            <ul class="file-list" id="file-list-${assignment.id}"></ul>
+                        </div>
+                    `;
+
+                    const toggleBtn = card.querySelector('.toggle-btn');
+                    const cardBody = card.querySelector('.card-body');
+
+                    toggleBtn.addEventListener('click', () => {
+                        if (cardBody.style.display === 'none') {
+                            fetch(`/files/assignment/${assignment.id}`)
+                                .then(response => response.json())
+                                .then(files => {
+                                    const fileList = document.getElementById(`file-list-${assignment.id}`);
+                                    fileList.innerHTML = '';
+                                    files.forEach(file => {
+                                        const fileItem = document.createElement('li');
+                                        fileItem.innerHTML = `<a href="${file.fileUrl}" target="_blank">${file.fileName}</a>`;
+                                        fileList.appendChild(fileItem);
+                                    });
+                                });
+                            cardBody.style.display = 'block';
+                        } else {
+                            cardBody.style.display = 'none';
+                        }
+                    });
+
+                    assignmentList.appendChild(card);
+                });
+            });
+    });
+</script>
+</body>
+</html>
