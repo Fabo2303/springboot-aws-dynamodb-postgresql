@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pantalla Inicial - Proyecto</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<div class="container">
+    <header>
+        <img th:src="@{/img/fisi.webp}" src="/img/fisi.webp" alt="Logo del Proyecto" class="logo">
+        <h1> Sistemas Distribuidos </h1>
+    </header>
+
+    <section class="group-members">
+        <br>
+        <h2>Integrantes:</h2>
+        <ul>
+            <li>BUSTAMANTE VALERA, Yoed Abel</li>
+            <li>CABANA RUIZ, Fabián Alexander</li>
+            <li>DIAZ TORRES, Jose Armando</li>
+            <li>VERA SERVAN, Brandon Diego</li>
+        </ul>
+    </section>
+
+    <div class="button-container-toggle">
+        <button id="darkModeButton" class="btn" onclick="toggleDarkMode()">Alternar Modo Oscuro</button>
+    </div>
+
+    <div class="button-container">
+        <a th:href="@{/tareas}" class="btn">Ver Tareas</a>
+    </div>
+
+    <br>
+
+    <div class="button-container">
+        <a th:href="@{/clima}" class="btn">Ver Clima</a>
+    </div>
+</div>
+
+<div class="clima">
+    <h3>Month: <span id="month" class="data"></span></h3>
+    <h3>Year: <span id="year" class="data"></span></h3>
+    <h3>Temperature: <span id="temperature" class="data temperature"></span></h3>
+    <h3>Precipitation: <span id="precipitation" class="data precipitation"></span></h3>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<script th:src="@{/js/websocket.js}"></script>
+
+<script>
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-theme');
+        const currentMode = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
+        localStorage.setItem('theme', currentMode);
+
+        const button = document.getElementById('darkModeButton');
+        button.textContent = currentMode === 'dark' ? 'Modo Claro' : 'Modo Oscuro';
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-theme');
+            document.getElementById('darkModeButton').textContent = 'Modo Claro';
+        } else {
+            document.getElementById('darkModeButton').textContent = 'Modo Oscuro';
+        }
+    });
+</script>
+</body>
+</html>
